@@ -1,24 +1,43 @@
 package com.example.testeableapp
 
-import androidx.test.platform.app.InstrumentationRegistry
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-
+import com.example.testeableapp.MainActivity
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import org.junit.Assert.*
-
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
+
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
+
     @Test
-    fun useAppContext() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.testeableapp", appContext.packageName)
+    fun test_elementosVisibles() {
+        composeTestRule.onNodeWithText("Redondear propina").assertIsDisplayed()
+        composeTestRule.onNode(hasTextStartingWith("Propina")).assertIsDisplayed()
+        composeTestRule.onNode(hasTextStartingWith("Total por persona")).assertIsDisplayed()
+    }
+
+
+    @Test
+    fun test_redondeoCambiaCalculo() {
+        val propinaOriginal = composeTestRule
+            .onNode(hasTextStartingWith("Propina"))
+            .assertExists()
+            .fetchSemanticsNode().config[SemanticsProperties.Text].joinToString()
+
+        composeTestRule.onNodeWithText("Redondear propina").performClick()
+
+        val propinaRedondeada = composeTestRule
+            .onNode(hasTextStartingWith("Propina"))
+            .assertExists()
+            .fetchSemanticsNode().config[SemanticsProperties.Text].joinToString()
+
+        assert(propinaOriginal != propinaRedondeada)
     }
 }
+
