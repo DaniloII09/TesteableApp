@@ -1,6 +1,8 @@
 package com.example.testeableapp
 
+import android.util.Log
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -21,11 +23,6 @@ class ExampleInstrumentedTest {
     @Test
     fun testRedondeoCambiaCalculo() {
         composeTestRule.onNodeWithTag("billAmount").performTextInput("100.50")
-        composeTestRule.onNodeWithTag("tipSlider").performTouchInput {
-            val xPos = visibleSize.width.toFloat() * 0.3f //15% de propina
-            val yPos = visibleSize.height.toFloat() / 2
-            moveTo(Offset(xPos, yPos))
-        }
 
         val propinaOriginal = composeTestRule.onNodeWithTag("tipAmount")
             .assertExists()
@@ -44,13 +41,22 @@ class ExampleInstrumentedTest {
     @Test
     fun testSliderCambiaPorcentaje() {
         composeTestRule.onNodeWithTag("billAmount").performTextInput("200.00")
-        composeTestRule.onNodeWithTag("tipSlider").performTouchInput {
-            val xPos = visibleSize.width.toFloat() * 0.4f //20% de propina
-            val yPos = visibleSize.height.toFloat() / 2
-            moveTo(Offset(xPos, yPos))
-        } //20% de propina
-        composeTestRule.onNodeWithTag("tipAmount").assertExists().assertTextContains("40.00")
+
+        composeTestRule.onNodeWithTag("tipSlider")
+            .performSemanticsAction(SemanticsActions.SetProgress) { it(20f) }
+
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onNodeWithTag("tipAmount")
+                .fetchSemanticsNode()
+                .config[SemanticsProperties.Text]
+                .joinToString()
+                .contains("Propina: $40.00")
+        }
+
+        composeTestRule.onNodeWithTag("tipAmount").assertTextContains("Propina: $40.00")
     }
+
 
     @Test
     fun testElementosVisibles() {
@@ -69,11 +75,6 @@ class ExampleInstrumentedTest {
     @Test
     fun testCambiaNumeroDePersonasActualizaTotal() {
         composeTestRule.onNodeWithTag("billAmount").performTextInput("150.00")
-        composeTestRule.onNodeWithTag("tipSlider").performTouchInput {
-            val xPos = visibleSize.width.toFloat() * 0.3f //15% de propina
-            val yPos = visibleSize.height.toFloat() / 2
-            moveTo(Offset(xPos, yPos))
-        }
 
         val totalInicial = composeTestRule.onNodeWithTag("totalPerPerson")
             .assertExists()
@@ -97,11 +98,6 @@ class ExampleInstrumentedTest {
     @Test
     fun testCambiarMontoActualizaPropina() {
         composeTestRule.onNodeWithTag("billAmount").performTextInput("200.00")
-        composeTestRule.onNodeWithTag("tipSlider").performTouchInput {
-            val xPos = visibleSize.width.toFloat() * 0.3f //15% de propina
-            val yPos = visibleSize.height.toFloat() / 2
-            moveTo(Offset(xPos, yPos))
-        }
         composeTestRule.onNodeWithTag("tipAmount").assertTextContains("30.00")
         composeTestRule.onNodeWithTag("billAmount").performTextReplacement("350.00")
         composeTestRule.onNodeWithTag("tipAmount").assertTextContains("52.50")

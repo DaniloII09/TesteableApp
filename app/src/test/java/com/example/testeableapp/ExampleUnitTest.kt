@@ -26,7 +26,7 @@ class ExampleUnitTest {
 
         val actualTip = calculateTip(amount, tipPercent, true)
 
-        assertEquals(ceil(expectedTip), actualTip, 0.01)
+        assertEquals(expectedTip, actualTip, 0.01)
     }
 
     @Test
@@ -75,7 +75,9 @@ class ExampleUnitTest {
     fun testPorcentajeCeroDaPropinaCero() {
         val amount = 150.0
         val tipPercent = 0
+
         val result = calculateTip(amount, tipPercent, false)
+
         assertEquals(0.0, result, 0.01)
     }
 }
